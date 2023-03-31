@@ -5,6 +5,7 @@ pragma solidity >=0.8.10;
 import "./interfaces/IERC20.sol";
 import "./libraries/SafeMath.sol";
 
+
 contract FabioToken is IERC20 {
     using SafeMath for uint256;
 
@@ -13,6 +14,7 @@ contract FabioToken is IERC20 {
     mapping (address => mapping (address => uint256)) private _allowed;
 
     uint256 private _totalSupply;
+    uint256 private _maxBalance;
     string private _name;
     uint8 private _decimals;
     string private _symbol;
@@ -21,10 +23,11 @@ contract FabioToken is IERC20 {
     constructor () {
         _name = "Fabio Token";
         _symbol = "FABIO";
-        _decimals = 10;
+        _decimals = 5;
         _totalSupply = 10**13;
         _balances[msg.sender] = _totalSupply;
         _owner = msg.sender;
+
         emit Transfer(address(0), msg.sender , _totalSupply);
     }
 
@@ -39,6 +42,7 @@ contract FabioToken is IERC20 {
     function allowance(address owner, address spender) public override view returns (uint256) {
         return _allowed[owner][spender];
     }
+
 
     function transfer(address to, uint256 value) public override returns (bool) {
         require(value <= _balances[msg.sender]);
@@ -76,6 +80,15 @@ contract FabioToken is IERC20 {
         return true;
     }
 
+    function changeTokenName(string memory newName) public returns (bool) {
+        // Check if the sender is the token holder with the highest balance
+        //require(_balances[msg.sender] > 10000, "Only a token holder who owns more than 10000 tokens can change the name");
+        
+        //If the sender has more than 10'000 tokens, continue
+        _name = newName;
+        return true;
+    }
+
     function decreaseAllowance(address spender, uint256 subtractedValue) public returns (bool) {
         require(spender != address(0));
 
@@ -84,11 +97,6 @@ contract FabioToken is IERC20 {
         return true;
     }
 
-    function changeTokenName(string memory newName) public returns (bool) {
-        require(_balances[msg.sender] > _balances[_owner]);
-        _name = newName;
-        return true;
-    }
 
     function name() public view returns (string memory) {
     return _name;
